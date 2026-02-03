@@ -3,6 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\Auth\RegisterRequest;
+use App\Http\Requests\Auth\LoginRequest;
+
+
 
 use App\Services\AuthServices;
 
@@ -28,9 +31,19 @@ class AuthController extends Controller
         ], 201);
     }
 
-    public function login()
+    public function login(LoginRequest $request)
     {
-
+        [$user, $token] = $this->authServices->login($request->validated());
+        return response()->json([
+            'message' => 'Login successfully.',
+            'token' => $token,
+            'user' => [
+                'id' => $user->id,
+                'name' => $user->name,
+                'email' => $user->email,
+                'role' => $user->role,
+            ],
+        ], 200);
     }
 
     public function logout()
