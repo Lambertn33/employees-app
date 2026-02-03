@@ -31,4 +31,10 @@ class AuthServices
         $token = $user->createToken('api')->plainTextToken;
         return [$user, $token];
     }
+
+    public function logout(User $user)
+    {
+        $user->tokens()->delete();
+        return ['success' => true, 'message' => 'Logged out successfully'];
+    }
 }
