@@ -7,6 +7,6 @@
     <title>Document</title>
 </head>
 <body>
-    <h2>Testing gh actions</h2>
+    <h2>Testing gh actions 2</h2>
 </body>
 </html>
