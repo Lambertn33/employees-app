@@ -48,6 +48,7 @@ jobs:
         env:
           APP_ENV: testing
           DB_CONNECTION: sqlite
+          APP_KEY: base64:Sqxx7gsL/fVyS8XjCgBJl72mFYD9FttsHRRz+yhSJS8=
           DB_DATABASE: database/database.sqlite
           CACHE_DRIVER: array
           QUEUE_CONNECTION: sync
@@ -58,6 +59,7 @@ jobs:
         env:
           APP_ENV: testing
           DB_CONNECTION: sqlite
+          APP_KEY: base64:Sqxx7gsL/fVyS8XjCgBJl72mFYD9FttsHRRz+yhSJS8=
           DB_DATABASE: database/database.sqlite
           CACHE_DRIVER: array
           QUEUE_CONNECTION: sync
