@@ -129,4 +129,100 @@ class AuthTest extends TestCase
         $this->assertNotEmpty($row->token);
         $this->assertNotNull($row->created_at);
     }
+
+    public function test_reset_password_with_valid_code_updates_password_deletes_token_and_revokes_tokens(): void
+    {
+        $user = User::factory()->create([
+            'email' => 'lambert@example.com',
+            'password' => Hash::make('OldPassword123!'),
+        ]);
+
+        // create known reset code
+        $code = '123456';
+
+        DB::table('password_reset_tokens')->updateOrInsert(
+            ['email' => $user->email],
+            ['token' => Hash::make($code), 'created_at' => now()]
+        );
+
+        // create some existing Sanctum tokens; reset should revoke them
+        $user->createToken('t1');
+        $user->createToken('t2');
+        $this->assertDatabaseCount('personal_access_tokens', 2);
+
+        $response = $this->postJson('/api/auth/reset-password', [
+            'email' => $user->email,
+            'code' => $code,
+            'password' => 'NewPassword123!',
+            'password_confirmation' => 'NewPassword123!',
+        ]);
+
+        $response->assertOk()
+            ->assertJson([
+                'message' => 'Password has been reset successfully.',
+            ]);
+
+        $user->refresh();
+
+        $this->assertTrue(Hash::check('NewPassword123!', $user->password));
+
+        // token is one-time use
+        $this->assertDatabaseMissing('password_reset_tokens', [
+            'email' => $user->email,
+        ]);
+
+        // tokens revoked
+        $this->assertDatabaseCount('personal_access_tokens', 0);
+    }
+
+    public function test_reset_password_rejects_wrong_code(): void
+    {
+        $user = User::factory()->create([
+            'email' => 'lambert@example.com',
+        ]);
+
+        DB::table('password_reset_tokens')->updateOrInsert(
+            ['email' => $user->email],
+            ['token' => Hash::make('123456'), 'created_at' => now()]
+        );
+
+        $response = $this->postJson('/api/auth/reset-password', [
+            'email' => $user->email,
+            'code' => '000000',
+            'password' => 'NewPassword123!',
+            'password_confirmation' => 'NewPassword123!',
+        ]);
+
+        $response->assertStatus(500)
+            ->assertJson([
+                'message' => 'Invalid or expired reset code.',
+            ]);
+    }
+
+    public function test_reset_password_rejects_expired_code(): void
+    {
+        $user = User::factory()->create([
+            'email' => 'lambert@example.com',
+        ]);
+
+        DB::table('password_reset_tokens')->updateOrInsert(
+            ['email' => $user->email],
+            [
+                'token' => Hash::make('123456'),
+                'created_at' => now()->subMinutes(16), // expired (15 min limit)
+            ]
+        );
+
+        $response = $this->postJson('/api/auth/reset-password', [
+            'email' => $user->email,
+            'code' => '123456',
+            'password' => 'NewPassword123!',
+            'password_confirmation' => 'NewPassword123!',
+        ]);
+
+        $response->assertStatus(500)
+            ->assertJson([
+                'message' => 'Invalid or expired reset code.',
+            ]);
+    }
 }
