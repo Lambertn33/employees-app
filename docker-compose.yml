@@ -14,24 +14,47 @@ services:
       APP_KEY: base64:dummykeydummykeydummykeydummykeydummykeydummy=
       APP_URL: http://localhost:8000
       LOG_CHANNEL: stack
+
       DB_CONNECTION: mysql
       DB_HOST: db
       DB_PORT: 3306
       DB_DATABASE: employees
       DB_USERNAME: employees
       DB_PASSWORD: employees
+
+      # Mailpit
+      MAIL_MAILER: smtp
+      MAIL_HOST: mailpit
+      MAIL_PORT: 1025
+      MAIL_USERNAME: null
+      MAIL_PASSWORD: null
+      MAIL_ENCRYPTION: null
+      MAIL_FROM_ADDRESS: "no-reply@employees.test"
+      MAIL_FROM_NAME: "Employees App"
+
+      CACHE_DRIVER: redis
+      SESSION_DRIVER: redis
+      QUEUE_CONNECTION: redis
+      REDIS_CLIENT: predis
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+
     volumes:
       - .:/var/www/html
     depends_on:
       db:
         condition: service_healthy
+      redis:
+        condition: service_started
+      mailpit:
+        condition: service_started
     command: >+
       sh -c "
         composer install --no-dev --prefer-dist --no-interaction &&
         npm install &&
         php artisan migrate &&
         php artisan serve --host=0.0.0.0 --port=8000"
-        
+
   db:
     image: mysql:8.0
     container_name: employees-db
@@ -51,5 +74,25 @@ services:
       timeout: 5s
       retries: 10
       start_period: 10s
+
+  mailpit:
+    image: axllent/mailpit:latest
+    container_name: employees-mailpit
+    restart: unless-stopped
+    ports:
+      - "1025:1025"
+      - "8025:8025"
+
+  redis:
+    image: redis:7-alpine
+    container_name: employees-redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    command: ["redis-server", "--appendonly", "yes"]
+    volumes:
+      - redis-data:/data
+
 volumes:
   db-data:
+  redis-data:
