@@ -21,16 +21,19 @@ jobs:
           extensions: mbstring, bcmath, pdo_sqlite
           coverage: none
 
-      - name: Cache Composer dependencies
+      - name: Cache Composer files
         uses: actions/cache@v4
         with:
-          path: vendor
-          key: ${{ runner.os }}-php-${{ hashFiles('**/composer.lock') }}
+          path: ~/.composer/cache/files
+          key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
           restore-keys: |
-            ${{ runner.os }}-php-
+            ${{ runner.os }}-composer-
 
       - name: Install dependencies
         run: composer install --no-interaction --no-progress --prefer-dist --optimize-autoloader
+
+      - name: Dump autoload
+        run: composer dump-autoload -o
 
       - name: Prepare environment
         run: |
@@ -38,8 +41,6 @@ jobs:
           php artisan key:generate
           php artisan config:clear
 
-      - name: Dump autoload
-        run: composer dump-autoload
         env:
           APP_ENV: testing
           DB_CONNECTION: sqlite
