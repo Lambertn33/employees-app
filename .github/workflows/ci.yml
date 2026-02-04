@@ -17,7 +17,7 @@ jobs:
       - name: Set up PHP
         uses: shivammathur/setup-php@v2
         with:
-          php-version: '8.4'
+          php-version: "8.4"
           extensions: mbstring, bcmath, pdo_sqlite
           coverage: none
 
@@ -37,6 +37,16 @@ jobs:
           cp .env.example .env
           php artisan key:generate
           php artisan config:clear
+
+      - name: Dump autoload
+        run: composer dump-autoload
+        env:
+          APP_ENV: testing
+          DB_CONNECTION: sqlite
+          DB_DATABASE: database/database.sqlite
+          CACHE_DRIVER: array
+          QUEUE_CONNECTION: sync
+          MAIL_MAILER: array
 
       - name: Configure SQLite (file)
         run: |
