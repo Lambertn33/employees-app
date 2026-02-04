@@ -50,4 +50,17 @@ class AttendancesTest extends TestCase
             'left_at' => null,
         ]);
     }
+
+    public function test_user_cannot_make_attendance_arrive(): void
+    {
+        $user = $this->user();
+        $employee = $this->employee();
+
+        $res = $this->actingAs($user, 'sanctum')
+            ->postJson('/api/attendances/arrive', [
+                'employee_id' => $employee->id,
+            ]);
+
+        $res->assertForbidden();
+    }
 }
