@@ -82,4 +82,29 @@ class AttendancesTest extends TestCase
         $res->assertStatus(422)
             ->assertJsonValidationErrors(['employee_id']);
     }
+
+    public function test_admin_can_leave_open_attendance(): void
+    {
+        $admin = $this->admin();
+        $employee = $this->employee();
+
+        $openAttendance = Attendance::create([
+            'employee_id' => $employee->id,
+            'arrived_at' => now()->subMinutes(10)
+        ]);
+
+        $res = $this->actingAs($admin, 'sanctum')
+            ->postJson('/api/attendances/leave', [
+                'employee_id' => $employee->id,
+            ]);
+
+        $res->assertOk()
+            ->assertJsonPath('data.id', $openAttendance->id);
+
+        $this->assertDatabaseHas('attendances', [
+            'id' => $openAttendance->id,
+        ]);
+
+        $this->assertNotNull($openAttendance->fresh()->left_at);
+    }
 }

@@ -33,6 +33,6 @@ class AttendancesController extends Controller
         $attendance = $this->attendanceServices->leave($request->validated()['employee_id']);
         return (new AttendanceResource($attendance->load('employee')))
             ->response()
-            ->setStatusCode(201);
+            ->setStatusCode(200);
     }
 }
