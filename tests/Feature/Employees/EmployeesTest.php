@@ -134,4 +134,37 @@ class EmployeesTest extends TestCase
         $this->assertDatabaseHas('employees', ['id' => $employee->id]);
     }
 
+    public function test_user_can_list_employees(): void
+    {
+        $user = $this->user();
+        Employee::create([
+            'names' => 'Employee 1',
+            'email' => 'employee1@gmail.com',
+            'telephone' => '250788484848',
+            'code' => 'EMP-121212'
+        ]);
+
+        $res = $this->actingAs($user, 'sanctum')
+            ->getJson('/api/employees');
+
+        $res->assertOk();
+    }
+
+    public function test_user_can_view_employee(): void
+    {
+        $user = $this->user();
+        $employee = Employee::create([
+            'names' => 'Employee 1',
+            'email' => 'employee1@gmail.com',
+            'telephone' => '250788484848',
+            'code' => 'EMP-121212'
+        ]);
+
+        $res = $this->actingAs($user, 'sanctum')
+            ->getJson("/api/employees/{$employee->id}");
+
+        $res->assertOk()
+            ->assertJsonFragment(['id' => $employee->id]);
+    }
+
 }
