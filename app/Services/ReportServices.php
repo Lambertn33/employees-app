@@ -17,10 +17,10 @@ class ReportServices
     {
         $day = $date ? Carbon::parse($date)->startOfDay() : now()->startOfDay();
         $from = $day->copy()->startOfDay();
-        $to = $day->copy()->endOfDay();
+        $to   = $day->copy()->endOfDay();
 
         $attendances = Attendance::query()
-            ->with(['employee'])
+            ->with('employee')
             ->whereBetween('arrived_at', [$from, $to])
             ->orderBy('arrived_at')
             ->get();
@@ -32,24 +32,22 @@ class ReportServices
                 $todayAttendance = $attendances->firstWhere('employee_id', $employee->id);
 
                 return [
-                    'code' => $employee->code,
-                    'names' => $employee->names,
-                    'email' => $employee->email,
-                    'telephone' => $employee->telephone,
+                    'code'       => $employee->code,
+                    'names'      => $employee->names,
+                    'email'      => $employee->email,
+                    'telephone'  => $employee->telephone,
                     'arrived_at' => $todayAttendance?->arrived_at,
-                    'left_at' => $todayAttendance?->left_at,
+                    'left_at'    => $todayAttendance?->left_at,
                 ];
             });
 
         $payload = [
-            'date' => $day->toDateString(),
+            'date'         => $day->toDateString(),
             'generated_at' => now()->toDateTimeString(),
-            'rows' => $employees,
+            'rows'         => $employees,
         ];
 
-        $html = view('reports.pdf', $payload)->render();
-
-        $pdf = SnappyPdf::loadHTML($html)
+        $pdf = SnappyPdf::loadView('reports.pdf', $payload)
             ->setPaper('a4')
             ->setOrientation('portrait')
             ->setOption('margin-top', '10mm')
@@ -57,11 +55,11 @@ class ReportServices
             ->setOption('margin-left', '10mm')
             ->setOption('margin-right', '10mm');
 
-        $filename = 'attendance-'.$day->toDateString().'.pdf';
+        $filename = 'attendance-' . $day->toDateString() . '.pdf';
 
         return [
             'filename' => $filename,
-            'content' => $pdf->output(),
+            'content'  => $pdf->output(),
         ];
     }
 
