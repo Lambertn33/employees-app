@@ -4,7 +4,10 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\hasMany;
+use Illuminate\Database\Eloquent\Attributes\UsePolicy;
+use App\Policies\EmployeePolicy;
 
+#[UsePolicy(EmployeePolicy::class)]
 class Employee extends Model
 {
     protected $fillable = [
