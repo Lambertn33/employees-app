@@ -4,6 +4,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\EmployeesController;
+use App\Http\Controllers\AttendancesController;
 
 Route::controller(AuthController::class)->prefix('auth')->group(function() {
     Route::post('/register', 'register');
@@ -15,4 +16,10 @@ Route::controller(AuthController::class)->prefix('auth')->group(function() {
 
 Route::middleware('auth:sanctum')->group(function () {
     Route::apiResource('employees', EmployeesController::class);
+
+    Route::controller(AttendancesController::class)->prefix('attendances')->group(function() {
+        Route::get('/', 'index');
+        Route::post('arrive', 'arrive');
+        Route::post('leave', 'leave');
+    });
 });
