@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Models\Attendance;
 use App\Services\AttendanceServices;
 use App\Http\Requests\Attendances\ArriveAndLeaveRequest;
+use App\Http\Resources\AttendanceResource;
 
 class AttendancesController extends Controller
 {
@@ -14,9 +15,10 @@ class AttendancesController extends Controller
     public function arrive(ArriveAndLeaveRequest $request)
     {
         try {
-            $attendance = $this->attendanceServices->arrive($request->validated()['employee_id']);
-
-            return response()->json($attendance, 201);
+            $attendance = $this->service->arrive($request->validated()['employee_id']);
+            return (new AttendanceResource($attendance->load('employee')))
+                ->response()
+                ->setStatusCode(201);
         } catch (\Exception $e) {
             return response()->json(['message' => $e->getMessage()], 500);
         }
