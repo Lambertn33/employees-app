@@ -90,4 +90,43 @@ class AuthTest extends TestCase
 
         $this->assertDatabaseCount('personal_access_tokens', 0);
     }
+
+    public function test_forgot_password_returns_generic_message_when_user_does_not_exist(): void
+    {
+        $response = $this->postJson('/api/auth/forgot-password', [
+            'email' => 'missing@example.com',
+        ]);
+
+        $response->assertOk()
+            ->assertJson([
+                'message' => 'If the email exists, a reset code has been sent.',
+            ]);
+
+        $this->assertDatabaseCount('password_reset_tokens', 0);
+    }
+
+    public function test_forgot_password_stores_token_for_existing_user(): void
+    {
+        $user = User::factory()->create([
+            'email' => 'lambert@example.com',
+        ]);
+
+        $response = $this->postJson('/api/auth/forgot-password', [
+            'email' => $user->email,
+        ]);
+
+        $response->assertOk()
+            ->assertJson([
+                'message' => 'If the email exists, a reset code has been sent.',
+            ]);
+
+        $this->assertDatabaseHas('password_reset_tokens', [
+            'email' => $user->email,
+        ]);
+
+        $row = DB::table('password_reset_tokens')->where('email', $user->email)->first();
+        $this->assertNotNull($row);
+        $this->assertNotEmpty($row->token);
+        $this->assertNotNull($row->created_at);
+    }
 }
