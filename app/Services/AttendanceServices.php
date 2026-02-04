@@ -82,6 +82,12 @@ class AttendanceServices
             'left_at' => now(),
         ]);
 
+        $this->mailServices->sendMail(
+            to: $employee->email,
+            subject: 'Left Record',
+            body: "Dear $employee->names, your attendance has been updated successfully"
+        );
+
         return $open->refresh();
     }
 }
