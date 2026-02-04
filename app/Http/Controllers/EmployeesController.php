@@ -59,8 +59,12 @@ class EmployeesController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(string $id)
+    public function destroy(Employee $employee)
     {
-        //
+        $this->authorize('delete', $employee);
+
+        $employee->delete();
+
+        return response()->json(['message' => 'Employee deleted']);
     }
 }
