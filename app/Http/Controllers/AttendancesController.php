@@ -22,7 +22,6 @@ class AttendancesController extends Controller
 
     public function arrive(ArriveAndLeaveRequest $request)
     {
-        $this->authorize('create', $employee);
         try {
             $attendance = $this->attendanceServices->arrive($request->validated()['employee_id']);
             return (new AttendanceResource($attendance->load('employee')))
@@ -35,7 +34,6 @@ class AttendancesController extends Controller
 
     public function leave(ArriveAndLeaveRequest $request)
     {
-        $this->authorize('update', $employee);
         try {
             $attendance = $this->attendanceServices->leave($request->validated()['employee_id']);
             return (new AttendanceResource($attendance->load('employee')))
