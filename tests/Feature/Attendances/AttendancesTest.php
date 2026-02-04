@@ -161,4 +161,15 @@ class AttendancesTest extends TestCase
         $data = $res->json('data');
         $this->assertNotEmpty($data);
     }
+
+    public function test_invalid_date_range_returns_422(): void
+    {
+        $admin = $this->admin();
+
+        $res = $this->actingAs($admin, 'sanctum')
+            ->getJson('/api/attendances?from=2026-02-04&to=2026-02-01');
+
+        $res->assertStatus(422)
+            ->assertJsonValidationErrors(['to']);
+    }
 }
