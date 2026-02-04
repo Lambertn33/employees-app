@@ -114,4 +114,24 @@ class EmployeesTest extends TestCase
         $this->assertDatabaseMissing('employees', ['id' => $employee->id]);
     }
 
+    public function test_user_cannot_delete_employee(): void
+    {
+        $user = $this->user();
+
+        $employee = Employee::create([
+            'names' => 'Employee 1',
+            'email' => 'employee1@gmail.com',
+            'telephone' => '250788484848',
+            'code' => 'EMP-121212'
+        ]);
+
+
+        $res = $this->actingAs($user, 'sanctum')
+            ->deleteJson("/api/employees/{$employee->id}");
+
+        $res->assertForbidden();
+
+        $this->assertDatabaseHas('employees', ['id' => $employee->id]);
+    }
+
 }
