@@ -43,4 +43,17 @@ class EmployeesTest extends TestCase
             'email' => 'john@example.com',
         ]);
     }
+
+    public function test_user_cannot_create_employee(): void
+    {
+        $user = $this->user(); 
+
+        $res = $this->actingAs($user, 'sanctum')
+            ->postJson('/api/employees', [
+                'names' => 'John Doe',
+                'email' => 'john@example.com',
+                'telephone' => '250788123456',
+            ]);
+        $res->assertForbidden();
+    }
 }
