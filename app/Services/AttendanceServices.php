@@ -1,0 +1,43 @@
+<?php
+
+namespace App\Services;
+
+use App\Models\Attendance;
+use App\Models\Employee;
+use Illuminate\Validation\ValidationException;
+use App\Services\MailServices;
+
+class AttendanceServices
+{
+    public function __construct(
+        private MailServices $mailServices,
+    ) {}
+
+    public function arrive(int $employeeId): Attendance
+    {
+        $employee = Employee::findOrFail($employeeId);
+
+        $open = Attendance::where('employee_id', $employee->id)
+            ->whereNull('left_at')
+            ->latest('arrived_at')
+            ->first();
+
+        if ($open) {
+            throw ValidationException::withMessages([
+                'employee_id' => ['Employee already has an open attendance.'],
+            ]);
+        }
+
+        $attendance = Attendance::create([
+            'employee_id' => $employee->id,
+            'arrived_at' => now(),
+        ]);
+
+        $this->mailServices->sendMail(
+            to: $employee->email,
+            subject: 'Arrival Record',
+            body: "Dear $employee->names, your attendance has been recorded"
+        );
+        return $attendance;
+    }
+}
