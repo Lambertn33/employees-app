@@ -5,6 +5,8 @@ use App\Models\User;
 use App\Services\MailServices;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\ValidationException;
+use Illuminate\Support\Carbon;
 
 class AuthServices
 {
@@ -67,5 +69,46 @@ class AuthServices
             subject: 'Password Reset Code',
             body: $body
         );
+    }
+
+    public function resetPasswordWithCode(string $email, string $code, string $newPassword): void
+    {
+        $row = DB::table('password_reset_tokens')->where('email', $email)->first();
+
+        if (!$row) {
+            throw ValidationException::withMessages([
+                'code' => ['Invalid or expired reset code.'],
+            ]);
+        }
+
+        $createdAt = Carbon::parse($row->created_at);
+        if ($createdAt->diffInMinutes(now()) > 15) {
+            DB::table('password_reset_tokens')->where('email', $email)->delete();
+
+            throw ValidationException::withMessages([
+                'code' => ['Invalid or expired reset code.'],
+            ]);
+        }
+
+        if (!Hash::check($code, $row->token)) {
+            throw ValidationException::withMessages([
+                'code' => ['Invalid or expired reset code.'],
+            ]);
+        }
+
+        $user = User::where('email', $email)->first();
+        if (!$user) {
+            throw ValidationException::withMessages([
+                'code' => ['Invalid or expired reset code.'],
+            ]);
+        }
+
+        $user->forceFill([
+            'password' => Hash::make($newPassword),
+        ])->save();
+
+        DB::table('password_reset_tokens')->where('email', $email)->delete();
+
+        $user->tokens()->delete();
     }
 }
