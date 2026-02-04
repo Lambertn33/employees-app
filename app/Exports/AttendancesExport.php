@@ -9,7 +9,7 @@ use Maatwebsite\Excel\Concerns\WithMapping;
 use Maatwebsite\Excel\Concerns\WithColumnFormatting;
 use PhpOffice\PhpSpreadsheet\Style\NumberFormat;
 
-class AttendancesExport implements FromCollection, WithHeadings, WithColumnFormatting
+class AttendancesExport implements FromCollection, WithHeadings, WithColumnFormatting, WithMapping
 {
 
     public function __construct(private Collection $rows) {}
@@ -41,7 +41,7 @@ class AttendancesExport implements FromCollection, WithHeadings, WithColumnForma
             $row['code'],
             $row['names'],
             $row['email'],
-            $row['telephone'],
+            (string) ($row['telephone'] ?? ''),
             $row['arrived_at'] ?? '',
             $row['left_at'] ?? '',
         ];

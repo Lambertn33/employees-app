@@ -9,7 +9,7 @@ class ReportsController extends Controller
 {
     public function __construct(private ReportServices $reportServices) {}
 
-    public function pdf(Request $request)
+    public function downloadPdf(Request $request)
     {
         $date = $request->query('date'); // YYYY-MM-DD or null
 
@@ -21,7 +21,7 @@ class ReportsController extends Controller
         ]);
     }
 
-    public function excel(Request $request)
+    public function downloadExcel(Request $request)
     {
         $date = $request->query('date'); // YYYY-MM-DD or null
         return $this->reportServices->getDailyReportInExcel($date);

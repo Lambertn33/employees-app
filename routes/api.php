@@ -23,9 +23,9 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('arrive', 'arrive');
         Route::post('leave', 'leave');
     });
-    Route::controller(ReportsController::class)->prefix('reports')->group(function(){
-        Route::get('/pdf', 'pdf');
-        Route::get('/excel', 'excel');
+    Route::controller(ReportsController::class)->prefix('reports')->group(function() {
+        Route::get('/pdf', 'downloadPdf');
+        Route::get('/excel', 'downloadExcel');
     });
 });
 
