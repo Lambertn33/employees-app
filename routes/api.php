@@ -19,5 +19,6 @@ Route::middleware('auth:sanctum')->group(function () {
 
     Route::controller(AttendancesController::class)->prefix('attendances')->group(function() {
         Route::post('arrive', 'arrive');
+        Route::post('leave', 'leave');
     });
 });

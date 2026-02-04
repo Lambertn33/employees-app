@@ -40,4 +40,26 @@ class AttendanceServices
         );
         return $attendance;
     }
+
+    public function leave(int $employeeId): Attendance
+    {
+        $employee = Employee::findOrFail($employeeId);
+
+        $open = Attendance::where('employee_id', $employee->id)
+            ->whereNull('left_at')
+            ->latest('arrived_at')
+            ->first();
+
+        if (!$open) {
+            throw ValidationException::withMessages([
+                'employee_id' => ['Employee has no open attendance to close.'],
+            ]);
+        }
+
+        $open->update([
+            'left_at' => now(),
+        ]);
+
+        return $open->refresh();
+    }
 }
