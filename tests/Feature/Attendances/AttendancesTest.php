@@ -32,7 +32,7 @@ class AttendancesTest extends TestCase
         ]);
     }
 
-    public function test_admin_can_make_attendance_arrive(): void
+    public function test_admin_can_make_attendance_arrival(): void
     {
         $admin = $this->admin();
         $employee = $this->employee();
@@ -51,7 +51,7 @@ class AttendancesTest extends TestCase
         ]);
     }
 
-    public function test_user_cannot_make_attendance_arrive(): void
+    public function test_user_cannot_make_attendance_arrival(): void
     {
         $user = $this->user();
         $employee = $this->employee();
@@ -62,5 +62,24 @@ class AttendancesTest extends TestCase
             ]);
 
         $res->assertForbidden();
+    }
+
+    public function test_employee_cannot_arrive_twice_without_leaving(): void
+    {
+        $admin = $this->admin();
+        $employee = $this->employee();
+
+        Attendance::create([
+            'employee_id' => $employee->id,
+            'arrived_at' => now()->subMinutes(10)
+        ]);
+
+        $res = $this->actingAs($admin, 'sanctum')
+            ->postJson('/api/attendances/arrive', [
+                'employee_id' => $employee->id,
+            ]);
+
+        $res->assertStatus(422)
+            ->assertJsonValidationErrors(['employee_id']);
     }
 }
