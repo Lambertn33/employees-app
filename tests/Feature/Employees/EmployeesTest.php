@@ -93,4 +93,25 @@ class EmployeesTest extends TestCase
 
         $res->assertForbidden();
     }
+
+    public function test_admin_can_delete_employee(): void
+    {
+        $admin = $this->admin();
+        $employee = Employee::create([
+            'names' => 'Employee 1',
+            'email' => 'employee1@gmail.com',
+            'telephone' => '250788484848',
+            'code' => 'EMP-121212'
+        ]);
+
+
+        $res = $this->actingAs($admin, 'sanctum')
+            ->deleteJson("/api/employees/{$employee->id}");
+
+        $res->assertOk()
+            ->assertJson(['message' => 'Employee deleted']);
+
+        $this->assertDatabaseMissing('employees', ['id' => $employee->id]);
+    }
+
 }
