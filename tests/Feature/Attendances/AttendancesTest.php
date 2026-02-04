@@ -107,4 +107,22 @@ class AttendancesTest extends TestCase
 
         $this->assertNotNull($openAttendance->fresh()->left_at);
     }
+
+    public function test_user_can_leave_open_attendance(): void
+    {
+        $user = $this->user();
+        $employee = $this->employee();
+
+        $openAttendance = Attendance::create([
+            'employee_id' => $employee->id,
+            'arrived_at' => now()->subMinutes(10)
+        ]);
+
+        $res = $this->actingAs($user, 'sanctum')
+            ->postJson('/api/attendances/leave', [
+                'employee_id' => $employee->id,
+            ]);
+
+        $res->assertForbidden();
+    }
 }
