@@ -1,61 +1,45 @@
-FROM php:8.4-cli-alpine
+FROM php:8.4-cli-bookworm
 
-# System dependencies
-RUN apk add --no-cache \
-    bash \
-    git \
-    curl \
-    libzip \
-    libpng \
-    oniguruma \
-    oniguruma-dev \
-    icu-dev \
-    libxml2-dev \
+RUN apt-get update && apt-get install -y \
+    bash git curl unzip zip \
+    # build deps for php extensions
+    pkg-config \
     libzip-dev \
     libpng-dev \
-    libjpeg-turbo-dev \
-    freetype-dev \
-    zip \
-    unzip \
-    mysql-client \
-    nodejs \
-    npm
+    libjpeg-dev \
+    libfreetype6-dev \
+    libicu-dev \
+    libxml2-dev \
+    libonig-dev \
+    # mysql client
+    default-mysql-client \
+    # wkhtmltopdf + fonts
+    wkhtmltopdf \
+    fontconfig xfonts-75dpi xfonts-base \
+    # node
+    nodejs npm \
+    && docker-php-ext-configure gd --with-freetype --with-jpeg \
+    && docker-php-ext-install \
+    pdo pdo_mysql mbstring exif pcntl bcmath gd intl opcache zip \
+    && apt-get clean && rm -rf /var/lib/apt/lists/*
 
-# Configure GD extension
-RUN docker-php-ext-configure gd --with-freetype --with-jpeg
-
-# PHP extensions (MySQL instead of Postgres)
-RUN docker-php-ext-install \
-    pdo \
-    pdo_mysql \
-    mbstring \
-    exif \
-    pcntl \
-    bcmath \
-    gd \
-    intl \
-    opcache \
-    zip
 
 # Composer
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
-# Workdir
 WORKDIR /var/www/html
 
-# Copy composer files and install dependencies
+# Install PHP deps first (better caching)
 COPY composer.json composer.lock ./
 RUN composer install --no-dev --prefer-dist --no-scripts --no-interaction
 
-# Copy the rest of the application
+# Copy app
 COPY . .
 
-# Clear caches (safe if commands fail)
+# Clear caches (safe)
 RUN php artisan config:clear || true \
     && php artisan route:clear || true
 
-# Expose PHP development server
 EXPOSE 8000
 
-# Default command (can be overridden by docker-compose)
 CMD ["php", "artisan", "serve", "--host=0.0.0.0", "--port=8000"]

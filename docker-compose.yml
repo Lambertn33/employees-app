@@ -31,6 +31,9 @@ services:
       REDIS_HOST: redis
       REDIS_PORT: 6379
 
+      WKHTML_PDF_BINARY: /usr/bin/wkhtmltopdf
+      WKHTML_IMG_BINARY: /usr/bin/wkhtmltoimage
+
     volumes:
       - .:/var/www/html
     depends_on:

@@ -5,6 +5,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\EmployeesController;
 use App\Http\Controllers\AttendancesController;
+use App\Http\Controllers\ReportsController;
 
 Route::controller(AuthController::class)->prefix('auth')->group(function() {
     Route::post('/register', 'register');
@@ -23,3 +24,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('leave', 'leave');
     });
 });
+
+        Route::controller(ReportsController::class)->prefix('reports')->group(function(){
+            Route::get('/pdf', 'getPdfReports');
+        });
