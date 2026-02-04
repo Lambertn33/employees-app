@@ -29,6 +29,11 @@ class EmployeeServices
         return Employee::create($data);
     }
 
+    public function updateEmployee(array $data, Employee $employee)
+    {
+        return $employee->update($data);
+    }
+
     public function generateEmployeeCode()
     {
         return 'EMP-' . Carbon::now()->format('YmdHis');

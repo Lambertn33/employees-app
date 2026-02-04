@@ -3,7 +3,6 @@
 namespace App\Http\Requests\Employees;
 
 use Illuminate\Foundation\Http\FormRequest;
-use App\Models\Employee;
 
 class StoreRequest extends FormRequest
 {
@@ -12,7 +11,7 @@ class StoreRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return $this->user()->can('create', Employee::class);
+        return true;
     }
 
     /**
@@ -30,6 +29,13 @@ class StoreRequest extends FormRequest
                 'regex:/^2507\d{8}$/',
                 'unique:employees,telephone',
             ],
+        ];
+    }
+
+    public function messages(): array
+    {
+        return [
+            'telephone.regex' => 'Telephone must be a 12-digit number starting with 2507.',
         ];
     }
 }

@@ -7,6 +7,7 @@ use App\Models\Employee;
 use App\Http\Resources\EmployeeResource;
 use App\Services\EmployeeServices;
 use App\Http\Requests\Employees\StoreRequest as EmployeesStoreRequest;
+use App\Http\Requests\Employees\UpdateRequest as EmployeesUpdateRequest;
 
 class EmployeesController extends Controller
 {
@@ -38,25 +39,21 @@ class EmployeesController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(string $id)
+    public function show(Employee $employee)
     {
-        //
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(string $id)
-    {
-        //
+        return new EmployeeResource($employee);
     }
 
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, string $id)
+    public function update(EmployeesUpdateRequest $request, Employee $employee)
     {
-        //
+        $this->authorize('update', $employee);
+
+        $this->employeeServices->updateEmployee($request->validated(), $employee);
+
+        return new EmployeeResource($employee);
     }
 
     /**
