@@ -75,4 +75,22 @@ class EmployeesTest extends TestCase
         $res->assertOk()
             ->assertJsonFragment(['names' => 'Updated Name']);
     }
+
+    public function test_user_cannot_update_employee(): void
+    {
+        $user = $this->user();
+        $employee = Employee::create([
+            'names' => 'Employee 1',
+            'email' => 'employee1@gmail.com',
+            'telephone' => '250788484848',
+            'code' => 'EMP-121212'
+        ]);
+
+        $res = $this->actingAs($user, 'sanctum')
+            ->putJson("/api/employees/{$employee->id}", [
+                'names' => 'Updated Name',
+            ]);
+
+        $res->assertForbidden();
+    }
 }
