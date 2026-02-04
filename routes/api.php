@@ -18,6 +18,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::apiResource('employees', EmployeesController::class);
 
     Route::controller(AttendancesController::class)->prefix('attendances')->group(function() {
+        Route::get('/', 'index');
         Route::post('arrive', 'arrive');
         Route::post('leave', 'leave');
     });

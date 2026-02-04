@@ -6,7 +6,7 @@ use App\Models\Attendance;
 use App\Models\Employee;
 use Illuminate\Validation\ValidationException;
 use App\Services\MailServices;
-use App\Requests\Attendances\AttendancesListRequest;
+use App\Http\Requests\Attendances\AttendancesListRequest;
 
 class AttendanceServices
 {
