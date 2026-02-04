@@ -25,6 +25,7 @@ Route::middleware('auth:sanctum')->group(function () {
     });
     Route::controller(ReportsController::class)->prefix('reports')->group(function(){
         Route::get('/pdf', 'pdf');
+        Route::get('/excel', 'excel');
     });
 });
 

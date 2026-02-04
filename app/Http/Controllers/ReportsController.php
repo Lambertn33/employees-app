@@ -20,4 +20,10 @@ class ReportsController extends Controller
             'Content-Disposition' => 'attachment; filename="'.$result['filename'].'"',
         ]);
     }
+
+    public function excel(Request $request)
+    {
+        $date = $request->query('date'); // YYYY-MM-DD or null
+        return $this->reportServices->getDailyReportInExcel($date);
+    }
 }
