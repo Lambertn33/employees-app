@@ -125,4 +125,40 @@ class AttendancesTest extends TestCase
 
         $res->assertForbidden();
     }
+
+    public function test_user_can_list_attendances_and_filter_by_employee_id(): void
+    {
+        $user = $this->user();
+        $employeeA = Employee::create([
+            'names' => 'Employee A',
+            'email' => 'employeeA@gmail.com',
+            'telephone' => '250788484841',
+            'code' => 'EMP-121211'
+        ]);
+        $employeeB = Employee::create([
+            'names' => 'Employee B',
+            'email' => 'employeeB@gmail.com',
+            'telephone' => '250788484842',
+            'code' => 'EMP-121212'
+        ]);
+
+        Attendance::create([
+            'employee_id' => $employeeA->id,
+            'arrived_at' => now()->subMinutes(10)
+        ]);
+
+        Attendance::create([
+            'employee_id' => $employeeB->id,
+            'arrived_at' => now()->subMinutes(10)
+        ]);
+
+        $res = $this->actingAs($user, 'sanctum')
+            ->getJson('/api/attendances?employee_id=' . $employeeA->id);
+
+        $res->assertOk()
+            ->assertJsonStructure(['data', 'links', 'meta']);
+
+        $data = $res->json('data');
+        $this->assertNotEmpty($data);
+    }
 }
