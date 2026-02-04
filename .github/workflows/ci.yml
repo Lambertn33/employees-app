@@ -11,14 +11,6 @@ jobs:
     permissions:
       contents: read
 
-    env:
-      APP_ENV: testing
-      DB_CONNECTION: sqlite
-      DB_DATABASE: database/database.sqlite
-      CACHE_DRIVER: array
-      QUEUE_CONNECTION: sync
-      MAIL_MAILER: array
-
     steps:
       - uses: actions/checkout@v4
 
@@ -43,20 +35,41 @@ jobs:
       - name: Dump autoload
         run: composer dump-autoload -o
 
-      - name: Configure SQLite (file)
-        run: |
-          mkdir -p database
-          touch database/database.sqlite
-
       - name: Prepare environment
         run: |
           cp .env.example .env
           php artisan key:generate
           php artisan config:clear
-          php artisan cache:clear
+
+        env:
+          APP_ENV: testing
+          DB_CONNECTION: sqlite
+          DB_DATABASE: database/database.sqlite
+          CACHE_DRIVER: array
+          QUEUE_CONNECTION: sync
+          MAIL_MAILER: array
+
+      - name: Configure SQLite (file)
+        run: |
+          mkdir -p database
+          touch database/database.sqlite
 
       - name: Run migrations
         run: php artisan migrate --force
+        env:
+          APP_ENV: testing
+          DB_CONNECTION: sqlite
+          DB_DATABASE: database/database.sqlite
+          CACHE_DRIVER: array
+          QUEUE_CONNECTION: sync
+          MAIL_MAILER: array
 
       - name: Run tests
         run: php artisan test
+        env:
+          APP_ENV: testing
+          DB_CONNECTION: sqlite
+          DB_DATABASE: database/database.sqlite
+          CACHE_DRIVER: array
+          QUEUE_CONNECTION: sync
+          MAIL_MAILER: array
