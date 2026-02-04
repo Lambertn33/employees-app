@@ -5,9 +5,14 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Employee;
 use App\Http\Resources\EmployeeResource;
+use App\Services\EmployeeServices;
+use App\Http\Requests\Employees\StoreRequest as EmployeesStoreRequest;
 
 class EmployeesController extends Controller
 {
+    public function __construct(private EmployeeServices $employeeServices)
+    {
+    }
     /**
      * Display a listing of the resource.
      */
@@ -15,31 +20,19 @@ class EmployeesController extends Controller
     {
         $this->authorize('viewAny', Employee::class);
 
-        $perPage = (int) $request->query('per_page', 10);
-    
-        $perPage = min(max($perPage, 1), 100);
-    
-        $employees = Employee::query()
-            ->latest()
-            ->paginate($perPage);
-    
-        return EmployeeResource::collection($employees);
-    }
-
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
-    {
-        //
+        return $this->employeeServices->getEmployees($request);
     }
 
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function store(EmployeesStoreRequest $request)
     {
-        //
+        $this->authorize('create', Employee::class);
+
+        $employee = $this->employeeServices->createEmployee($request->validated());
+
+        return new EmployeeResource($employee);
     }
 
     /**
