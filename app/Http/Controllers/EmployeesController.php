@@ -3,15 +3,27 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use App\Models\Employee;
+use App\Http\Resources\EmployeeResource;
 
 class EmployeesController extends Controller
 {
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
-        //
+        $this->authorize('viewAny', Employee::class);
+
+        $perPage = (int) $request->query('per_page', 10);
+    
+        $perPage = min(max($perPage, 1), 100);
+    
+        $employees = Employee::query()
+            ->latest()
+            ->paginate($perPage);
+    
+        return EmployeeResource::collection($employees);
     }
 
     /**
