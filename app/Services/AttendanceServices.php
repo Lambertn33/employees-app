@@ -6,12 +6,34 @@ use App\Models\Attendance;
 use App\Models\Employee;
 use Illuminate\Validation\ValidationException;
 use App\Services\MailServices;
+use App\Requests\Attendances\AttendancesListRequest;
 
 class AttendanceServices
 {
     public function __construct(
         private MailServices $mailServices,
     ) {}
+
+    public function getAttendances(AttendancesListRequest $request)
+    {
+        $perPage = (int) ($request->per_page ?? 10);
+
+        $query = Attendance::with('employee');
+
+        if ($request->filled('employee_id')) {
+            $query->where('employee_id', $request->employee_id);
+        }
+
+        if ($request->filled('from')) {
+            $query->whereDate('arrived_at', '>=', $request->from);
+        }
+
+        if ($request->filled('to')) {
+            $query->whereDate('arrived_at', '<=', $request->to);
+        }
+
+        return $query->latest('arrived_at')->paginate($perPage);
+    }
 
     public function arrive(int $employeeId): Attendance
     {

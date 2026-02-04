@@ -4,14 +4,14 @@ namespace App\Http\Requests\Attendances;
 
 use Illuminate\Foundation\Http\FormRequest;
 
-class ArriveAndLeaveRequest extends FormRequest
+class AttendancesListRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
      */
     public function authorize(): bool
     {
-        return $this->user()?->isAdmin() ?? false;
+        return true;
     }
 
     /**
@@ -22,7 +22,10 @@ class ArriveAndLeaveRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'employee_id' => ['required', 'integer', 'exists:employees,id'],
+            'employee_id' => ['nullable', 'integer', 'exists:employees,id'],
+            'from' => ['nullable', 'date'],
+            'to' => ['nullable', 'date', 'after_or_equal:from'],
+            'per_page' => ['nullable', 'integer', 'min:1', 'max:100'],
         ];
     }
 }

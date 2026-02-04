@@ -19,8 +19,6 @@ class EmployeesController extends Controller
      */
     public function index(Request $request)
     {
-        $this->authorize('viewAny', Employee::class);
-
         return $this->employeeServices->getEmployees($request);
     }
 
