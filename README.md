@@ -85,6 +85,7 @@ The system emphasizes clean architecture, strong validation, role-based authoriz
 
 3. **Access the API
 
-  API Base URL: http://localhost:8000
+  API Base URL: http://localhost:8000/api
   Mailpit UI: http://localhost:8025
+  Documentation UI: http://localhost:8000/openapi.json (after installing everything, run: php artisan openapi:generate then visit this link)
 ````
